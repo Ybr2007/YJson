@@ -10,7 +10,7 @@ namespace YJson
     class Parser
     {
     public:
-        Object parse(std::string json);
+        Object parse(std::string jsonString);
 
     private:
         Pos __pointer;
@@ -26,28 +26,28 @@ namespace YJson
         Object __parseDict();
 
         inline char __curChar();
+        inline bool __isEmpty(char chr);
         bool __tryMovePtr();
-        bool __isEmpty(char chr);
     };
 
     /*
     解析json文本
 
     Args:
-        std::string json -> json文本
+        std::string jsonString -> json文本
 
     Return:
         YJson::Object -> 解析得到的对象
     */
-    Object Parser::parse(std::string json)
+    Object Parser::parse(std::string jsonString)
     {
-        this->__json = json;
+        this->__json = jsonString;
         this->__pointer = 0;
         this->__finished = false;
 
         if (this->__json.empty())
         {
-            throw ParsingException("Empty string.", 0);
+            throw ParsingException("Empty string: Json string is empty.", 0);
         }
 
         Object result = this->__parseObject();
@@ -58,7 +58,7 @@ namespace YJson
             {
                 if (!this->__isEmpty(this->__curChar()))
                 {
-                    throw ParsingException("A JSON should only have one root object.", this->__pointer);
+                    throw ParsingException("Multiple Root Object: A JSON should only have one root object.", this->__pointer);
                 }
                 if (!this->__tryMovePtr())
                 {
@@ -77,7 +77,7 @@ namespace YJson
         {
             if(!__tryMovePtr())  // 从此处到结尾全是空白
             {
-                throw ParsingException("Empty string.", this->__pointer);
+                throw ParsingException("Empty String: Residual json string is empty.", this->__pointer);
             }
         }
 
@@ -86,7 +86,7 @@ namespace YJson
         if (this->__curChar() == '"') return this->__parseString();    // 匹配到 " 认定为string
         if (this->__curChar() == 't' || this->__curChar() == 'f') return this->__parseBoolean();  // 匹配到 t 或 f 认定为bool
         if (this->__curChar() == 'n') return this->__parseNull();  // 匹配到 n 认定为null
-        if (std::isdigit(this->__curChar()) || this->__curChar() == '-') return this->__parseNumber();  // 匹配到数字认定为number
+        if (std::isdigit(this->__curChar()) || this->__curChar() == '-') return this->__parseNumber();  // 匹配到数字或负号认定为number
         throw ParsingException("Unknown object.", this->__pointer);
     }
 

@@ -32,11 +32,6 @@ namespace YJson
             this->__pos = pos;
         }
 
-        virtual const char *what() const throw()
-        {
-            return __message.c_str();
-        }
-
         size_t pos() const
         {
             return this->__pos;

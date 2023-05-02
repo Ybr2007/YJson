@@ -1,20 +1,20 @@
-# Introduction
+# 介绍
 
-**YJson** is a lightweight JSON serialization/deserialization C++ library.
+**YJson** 是一个轻量级的 JSON 序列化/反序列化 C++ 库。
 
-# How to Use
+# 使用方法
 
-## Include
+## 包含头文件
 
 ```cpp
 #include <YJson/YJson.cpp>
 ```
 
-## Example
+## 示例
 
-### Read & Deserialize
+### 读取并反序列化
 
-Example json file
+示例 JSON
 
 ```JSON
 {
@@ -34,7 +34,7 @@ Example json file
 }
 ```
 
-Example code.
+示例代码
 
 ```cpp
 #include <YJson/YJson.cpp>
@@ -87,7 +87,7 @@ int main()
 }
 ```
 
-Console output
+控制台输出
 
 ```
 {"key_1": null, "key_2": 3.14, "key_3": "Hello World", "key_4": ["This", "is", 1, "List", "你好"], "key_5": {"subkey_1": 2333, "subkey_2": true, "subkey_3": [114, 810]}}
@@ -112,9 +112,9 @@ false
 subkey_1 subkey_2 subkey_3 
 ```
 
-### Serialize & Write
+### 序列化并写入
 
-Example code
+示例代码
 
 ```cpp
 #include <YJson/YJson.cpp>
@@ -142,7 +142,7 @@ int main()
 }
 ```
 
-Output JSON
+输出 JSON
 
 ```json
 {
@@ -159,13 +159,13 @@ Output JSON
 }
 ```
 
-**See the example at：**
+**在这里查看示例代码：**
 
 ```
 ./example.cpp
 ```
 
-# License
+# 许可
 
 ```
 MIT License
