@@ -4,6 +4,10 @@
 
 # How to Use
 
+## Prerequisite
+
+Require C++ 17 or higher version
+
 ## Include
 
 ```cpp
@@ -101,15 +105,13 @@ null
 1
 "List"
 "你好"
-invalid vector subscript
 2333
 true
 [114, 810]
-No such key: subkey_4
 true
 false
-"This" "is" 1 "List" "你好" 
-subkey_1 subkey_2 subkey_3 
+"This" "is" 1 "List" "你好"
+subkey_1 subkey_2 subkey_3
 ```
 
 ### Serialize & Write
@@ -159,7 +161,7 @@ Output JSON
 }
 ```
 
-**See the example at：**
+**See the example code at：**
 
 ```
 ./example.cpp

@@ -3,10 +3,12 @@
 
 using namespace std;
 
+std::string rootPath = ".\\";
+
 void DeserializeExample()
 {
     // 读取并反序列化  Read & Deserialize
-    auto obj = YJson::deserializeFromFile("example.json");
+    auto obj = YJson::deserializeFromFile(rootPath + "example.json");
 
     cout << obj << endl;
 
@@ -64,7 +66,7 @@ void SerializeExample()
     dict2["subkey"] = true;
     dict["key_5"] = dict2;
 
-    YJson::serializeToFile("output.json", YJson::Object(dict), 4);
+    YJson::serializeToFile(rootPath + "output.json", YJson::Object(dict), 4);
 }
 
 int main()
