@@ -26,7 +26,7 @@ namespace YJson
         Object __parseDict();
 
         inline char __curChar();
-        inline bool __isEmpty(char chr);
+        inline bool __isBlank(char chr);
         bool __tryMovePtr();
     };
 
@@ -47,7 +47,7 @@ namespace YJson
 
         if (this->__json.empty())
         {
-            throw ParsingException("Empty string: Json string is empty.", 0);
+            throw ParsingException("Empty string: The json string is empty.", 0);
         }
 
         Object result = this->__parseObject();
@@ -56,7 +56,7 @@ namespace YJson
         {
             while (true)
             {
-                if (!this->__isEmpty(this->__curChar()))
+                if (!this->__isBlank(this->__curChar()))
                 {
                     throw ParsingException("Multiple Root Object: A JSON should only have one root object.", this->__pointer);
                 }
@@ -73,11 +73,11 @@ namespace YJson
     Object Parser::__parseObject()
     {
         // 跳过先导空白
-        while (this->__isEmpty(this->__curChar()))
+        while (this->__isBlank(this->__curChar()))
         {
             if(!__tryMovePtr())  // 从此处到结尾全是空白
             {
-                throw ParsingException("Empty String: Residual json string is empty.", this->__pointer);
+                throw ParsingException("Empty String: The remaining chars of the json string are all blank", this->__pointer);
             }
         }
 
@@ -100,7 +100,7 @@ namespace YJson
         }
         else
         {
-            throw ParsingException("Try to parse unknown object as null.", this->__pointer);
+            throw ParsingException("Try to parse an unknown object as null.", this->__pointer);
         }
     }
 
@@ -113,7 +113,7 @@ namespace YJson
         bool foundSignE = false;
         bool foundMinusSign = false;
         bool foundZeroAtBegin = false;
-        Pos zeroAtBeginPos;
+        Pos posOfZeroAtBeginning;
 
         while (true)
         {
@@ -136,7 +136,7 @@ namespace YJson
             {
                 if (foundMinusSign && this->__pointer == numberBeginPos + 1)
                 {
-                    throw ParsingException("Illegal number: Found dot following the minus sign.", this->__pointer);
+                    throw ParsingException("Illegal number: Found a dot following the minus sign.", this->__pointer);
                 }
                 if (!foundDot && !foundSignE)  // 只能有一个小数点，并且小数点不能在指数中
                 {
@@ -144,7 +144,7 @@ namespace YJson
                 }
                 else
                 {
-                    throw ParsingException("Illegal number: Found dot after the first dot or 'e'.", this->__pointer);
+                    throw ParsingException("Illegal number: Found a dot after the first dot or 'e'.", this->__pointer);
                 }
             } 
             else if (this->__curChar() == '-')
@@ -152,7 +152,7 @@ namespace YJson
                 // 如果负号不在数字的一个位则属于非法数字
                 if (this->__pointer != numberBeginPos)
                 {
-                    throw ParsingException("Illegal number: The minus sign must at the begin of the number.", this->__pointer);
+                    throw ParsingException("Illegal number: The minus sign must be at the beginning of a number.", this->__pointer);
                 }
                 foundMinusSign = true;
             }
@@ -165,10 +165,11 @@ namespace YJson
             {
                 if (this->__curChar() == '0')
                 {
-                    if ((foundMinusSign && this->__pointer == numberBeginPos + 1) || (!foundMinusSign && this->__pointer == numberBeginPos))
+                    if ((foundMinusSign && this->__pointer == numberBeginPos + 1) || 
+                        (!foundMinusSign && this->__pointer == numberBeginPos))
                     {
                         foundZeroAtBegin = true;
-                        zeroAtBeginPos = this->__pointer;
+                        posOfZeroAtBeginning = this->__pointer;
                     }
                 }
             }
@@ -180,9 +181,9 @@ namespace YJson
             }
         }
 
-        if (foundZeroAtBegin && zeroAtBeginPos != numberEndPos)
+        if (foundZeroAtBegin && posOfZeroAtBeginning != numberEndPos)  // 先导0
         {
-            throw ParsingException("Found zero at begin.", zeroAtBeginPos);
+            throw ParsingException("Illegal number: Found a zero at beginning.", posOfZeroAtBeginning);
         }
 
        if (this->__json[numberEndPos] == 'e' || this->__json[numberEndPos] == '.' || 
@@ -252,7 +253,7 @@ namespace YJson
             }
             else
             {
-                throw ParsingException("Try to parse unknown object as boolean.", this->__pointer);
+                throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
             }
         }
 
@@ -266,7 +267,7 @@ namespace YJson
             }
             else
             {
-                throw ParsingException("Try to parse unknown object as boolean.", this->__pointer);
+                throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
             }
         }
     }
@@ -316,7 +317,7 @@ namespace YJson
                         throw ParsingException("Item not found.", this->__pointer);
                     }
                 }
-                else if (!this->__isEmpty(this->__curChar()))
+                else if (!this->__isBlank(this->__curChar()))
                 {
                     if (this->__curChar() == ']')
                     {
@@ -342,7 +343,7 @@ namespace YJson
                 {
                     break;
                 }
-                throw ParsingException("Comma at the end of the list.", this->__pointer);
+                throw ParsingException("A comma at the end of the list.", this->__pointer);
             }
         }
 
@@ -353,7 +354,7 @@ namespace YJson
     {
         if (this->__curChar() != '{')
         {
-            throw ParsingException("Left brace not found.", this->__pointer);
+            throw ParsingException("Left braces not found.", this->__pointer);
         }
 
         if (!this->__tryMovePtr())  // 从左大括号的下一个字符开始
@@ -375,7 +376,7 @@ namespace YJson
             Object key = this->__parseObject();
             if (key.type() != ObjectType::String)
             {
-                throw ParsingException("Type of key is not string.", this->__pointer);
+                throw ParsingException("Type of key is not the string.", this->__pointer);
             }
 
             bool foundColon = false;
@@ -398,11 +399,11 @@ namespace YJson
                 throw ParsingException("Value not found.", this->__pointer);
             }
 
-            while (this->__isEmpty(this->__curChar()))
+            while (this->__isBlank(this->__curChar()))
             {
                 if (!this->__tryMovePtr())
                 {
-                    throw ParsingException("Right brace not found.", this->__pointer);
+                    throw ParsingException("Brace not found.", this->__pointer);
                 }
             }
 
@@ -433,7 +434,7 @@ namespace YJson
                         throw ParsingException("Key not found.", this->__pointer);
                     }
                 }
-                else if (!this->__isEmpty(this->__curChar()))
+                else if (!this->__isBlank(this->__curChar()))
                 {
                     if (this->__curChar() == '}')
                     {
@@ -483,7 +484,7 @@ namespace YJson
         return false;
     }
 
-    bool Parser::__isEmpty(char chr)
+    bool Parser::__isBlank(char chr)
     {
         return chr == ' ' || chr == '\n';
     }

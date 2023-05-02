@@ -46,7 +46,7 @@ int main()
     system("chcp 65001");  // 将控制台编码设置为utf-8  Set the console encoding to utf-8
 
     // 读取并反序列化  Read & Deserialize
-    auto obj = YJson::deserializeFromFile("Y:\\C++\\YJson\\example.json");
+    auto obj = YJson::deserializeFromFile("example.json");
 
     cout << obj << endl;
 
@@ -136,7 +136,7 @@ int main()
     dict2["subkey"] = true;
     dict["key_5"] = dict2;
 
-    YJson::serializeToFile("Y:\\C++\\YJson\\output.json", YJson::Object(dict), 4);
+    YJson::serializeToFile("output.json", YJson::Object(dict), 4);
 }
 ```
 
