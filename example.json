@@ -1,0 +1,15 @@
+{
+    "key_1": null,
+    "key_2": 3.14,
+    "key_3": "Hello World",
+    "key_4": [
+        "This", "is", 1, "List", "你好"
+    ],
+    "key_5": {
+        "subkey_1": 2333,
+        "subkey_2": true,
+        "subkey_3": [
+            114, 810
+        ]
+    }
+}
