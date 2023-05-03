@@ -1,3 +1,5 @@
+[English Document](./README.md)
+
 # 介绍
 
 **YJson** 是一个轻量级的 JSON 序列化/反序列化 C++ 库。

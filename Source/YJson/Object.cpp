@@ -57,20 +57,6 @@ namespace YJson
             default: throw Exception("Type has no corresponding variant index");
         }
     }
-
-    std::string getObjectTypeName(ObjectType type)
-    {
-        switch (type)
-        {
-            case ObjectType::Null: return "Null";
-            case ObjectType::Number: return "Number";
-            case ObjectType::String: return "String";
-            case ObjectType::Boolean: return "Boolean";
-            case ObjectType::List: return "List";
-            case ObjectType::Dict: return "Dict";
-            default: throw Exception("Type has no corresponding name");
-        }
-    }
     
     class Object
     {
@@ -88,22 +74,22 @@ namespace YJson
             return *this;
         }
 
-        inline ObjectType type() const
+        ObjectType type() const
         {
             return variantIndexToType(this->__value.index());
         }
 
-        inline bool isNull() const
+        bool isNull() const
         {
             return this->type() == ObjectType::Null;
         }
 
-        inline ObjectValue value() const
+        ObjectValue value() const
         {
             return this->__value;
         }
 
-        inline void setValue(ObjectValue value)
+        void setValue(ObjectValue value)
         {
             this->__value = value;
         }

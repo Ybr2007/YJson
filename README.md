@@ -1,3 +1,5 @@
+[中文文档](./README_CN.md)
+
 # Introduction
 
 **YJson** is a lightweight JSON serialization/deserialization C++ library.

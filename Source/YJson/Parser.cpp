@@ -25,8 +25,8 @@ namespace YJson
         Object __parseList();
         Object __parseDict();
 
-        inline char __curChar();
-        inline bool __isBlank(char chr);
+        char __curChar();
+        bool __isBlank(char chr);
         bool __tryMovePtr();
     };
 
