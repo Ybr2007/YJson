@@ -8,7 +8,7 @@
 
 ## Prerequisite
 
-Require C++ 17 or higher version
+Require C++ 17 or higher version.
 
 ## Include
 
@@ -34,7 +34,7 @@ Example json file
         "subkey_1": 2333,
         "subkey_2": true,
         "subkey_3": [
-            114, 810
+            114, -10.24e-2
         ]
     }
 }
@@ -96,12 +96,12 @@ int main()
 Console output
 
 ```
-{"key_1": null, "key_2": 3.14, "key_3": "Hello World", "key_4": ["This", "is", 1, "List", "你好"], "key_5": {"subkey_1": 2333, "subkey_2": true, "subkey_3": [114, 810]}}
+{"key_1": null, "key_2": 3.14, "key_3": "Hello World", "key_4": ["This", "is", 1, "List", "你好"], "key_5": {"subkey_1": 2333, "subkey_2": true, "subkey_3": [114, -0.1024]}}
 null
 3.14
 "Hello World"
 ["This", "is", 1, "List", "你好"]
-{"subkey_1": 2333, "subkey_2": true, "subkey_3": [114, 810]}
+{"subkey_1": 2333, "subkey_2": true, "subkey_3": [114, -0.1024]}
 "This"
 "is"
 1
@@ -109,11 +109,11 @@ null
 "你好"
 2333
 true
-[114, 810]
+[114, -0.1024]
 true
 false
-"This" "is" 1 "List" "你好"
-subkey_1 subkey_2 subkey_3
+"This" "is" 1 "List" "你好" 
+subkey_1 subkey_2 subkey_3 
 ```
 
 ### Serialize & Write

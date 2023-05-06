@@ -14,7 +14,7 @@ namespace YJson
 
     private:
         Pos __pointer;
-        std::string __json;
+        std::string __jsonString;
         bool __finished;
 
         Object __parseObject();
@@ -41,11 +41,11 @@ namespace YJson
     */
     Object Parser::parse(std::string jsonString)
     {
-        this->__json = jsonString;
+        this->__jsonString = jsonString;
         this->__pointer = 0;
         this->__finished = false;
 
-        if (this->__json.empty())
+        if (this->__jsonString.empty())
         {
             throw ParsingException("Empty string: The json string is empty.", 0);
         }
@@ -92,10 +92,13 @@ namespace YJson
 
     Object Parser::__parseNull()
     {
-        std::string boolString = this->__json.substr(this->__pointer, 4);
+        std::string boolString = this->__jsonString.substr(this->__pointer, 4);
         if (boolString == "null")
         {
-            this->__pointer += 4;
+            for (short _ = 0; _ < 4; _ ++)  // 跳过 "null" 这4个字符，使指针指向 "null" 后第一个字符
+            {
+                this->__tryMovePtr();
+            }
             return Object();
         }
         else
@@ -106,7 +109,7 @@ namespace YJson
 
     Object Parser::__parseNumber()
     {
-        Pos numberBeginPos = this->__pointer;
+        Pos numberBeginPos = this->__pointer;  // 数字第一个字符的位置
         Pos numberEndPos;  // 数字最后一位的位置
         
         bool foundDot = false;
@@ -114,6 +117,7 @@ namespace YJson
         bool foundMinusSign = false;
         bool foundZeroAtBegin = false;
         Pos posOfZeroAtBeginning;
+        Pos posOfSignE;
 
         while (true)
         {
@@ -126,6 +130,7 @@ namespace YJson
                 if (!foundSignE)  // 检查是否已经存在'e'
                 {
                     foundSignE = true;
+                    posOfSignE = this->__pointer;
                 }
                 else
                 {
@@ -149,8 +154,8 @@ namespace YJson
             } 
             else if (this->__curChar() == '-')
             {
-                // 如果负号不在数字的一个位则属于非法数字
-                if (this->__pointer != numberBeginPos)
+                // 如果负号不在数字的开头或指数的开头则属于非法数字
+                if (this->__pointer != numberBeginPos && !(foundSignE && this->__pointer == posOfSignE + 1))
                 {
                     throw ParsingException("Illegal number: The minus sign must be at the beginning of a number.", this->__pointer);
                 }
@@ -186,13 +191,13 @@ namespace YJson
             throw ParsingException("Illegal number: Found a zero at beginning.", posOfZeroAtBeginning);
         }
 
-       if (this->__json[numberEndPos] == 'e' || this->__json[numberEndPos] == '.' || 
-            this->__json[numberEndPos] == '-')
+       if (this->__jsonString[numberEndPos] == 'e' || this->__jsonString[numberEndPos] == '.' || 
+            this->__jsonString[numberEndPos] == '-')
         {
             throw ParsingException("Illegal number: 'e', '-' or '.' can not be the end of the number.", numberEndPos);
         }
 
-        ObjectValue number = std::stod(this->__json.substr(numberBeginPos, numberEndPos - numberBeginPos + 1));
+        ObjectValue number = std::stod(this->__jsonString.substr(numberBeginPos, numberEndPos - numberBeginPos + 1));
         return Object(number);
     }
 
@@ -208,7 +213,7 @@ namespace YJson
             throw ParsingException("Right quotation mark not found.", this->__pointer);
         }
 
-        Pos leftQuotationMarkPos = this->__pointer;
+        Pos firstCharPos = this->__pointer;
         Pos rightQuotationMarkPos;
         bool escape = false;
 
@@ -237,18 +242,21 @@ namespace YJson
             }
         }
 
-        ObjectValue string = this->__json.substr(leftQuotationMarkPos, rightQuotationMarkPos - leftQuotationMarkPos);
-        return Object(string);
+        ObjectValue stringValue = this->__jsonString.substr(firstCharPos, rightQuotationMarkPos - firstCharPos);
+        return Object(stringValue);
     }
 
     Object Parser::__parseBoolean()
     {
         if (this->__curChar() == 't')
         {
-            std::string boolString = this->__json.substr(this->__pointer, 4);
+            std::string boolString = this->__jsonString.substr(this->__pointer, 4);
             if (boolString == "true")
             {
-                this->__pointer += 4;
+                for (short _ = 0; _ < 4; _ ++)  // 跳过 "true" 这4个字符，使指针指向 "true" 后第一个字符
+                {
+                    this->__tryMovePtr();
+                }
                 return Object(ObjectValue(true));
             }
             else
@@ -259,10 +267,13 @@ namespace YJson
 
         if (this->__curChar() == 'f')
         {
-            std::string boolString = this->__json.substr(this->__pointer, 5);
+            std::string boolString = this->__jsonString.substr(this->__pointer, 5);
             if (boolString == "false")
             {
-                this->__pointer += 5;
+                for (short _ = 0; _ < 5; _ ++)  // 跳过 "false" 这5个字符，使指针指向 "false" 后第一个字符
+                {
+                    this->__tryMovePtr();
+                }
                 return Object(ObjectValue(false));
             }
             else
@@ -470,12 +481,12 @@ namespace YJson
 
     char Parser::__curChar()
     {
-        return this->__json[this->__pointer];
+        return this->__jsonString[this->__pointer];
     }
 
     bool Parser::__tryMovePtr()
     {
-        if (this->__pointer < this->__json.size() - 1)
+        if (this->__pointer < this->__jsonString.size() - 1)
         {
             this->__pointer ++;
             return true;
