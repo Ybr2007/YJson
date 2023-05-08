@@ -8,3 +8,9 @@ build
 
 # tool bats
 *.bat
+
+# test code
+test.cpp
+
+# large_example
+large_example.json

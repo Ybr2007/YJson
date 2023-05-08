@@ -3,7 +3,7 @@
 
 using namespace std;
 
-std::string rootPath = ".\\";
+std::string rootPath = "Y:\\C++\\YJson\\";
 
 void DeserializeExample()
 {

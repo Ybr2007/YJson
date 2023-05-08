@@ -26,8 +26,10 @@ namespace YJson
         Object __parseDict();
 
         char __curChar();
-        bool __isBlank(char chr);
         bool __tryMovePtr();
+
+        bool __isBlank(char chr);
+        bool __isSignE(char chr);
     };
 
     /*
@@ -116,21 +118,22 @@ namespace YJson
         bool foundSignE = false;
         bool foundMinusSign = false;
         bool foundZeroAtBegin = false;
-        Pos posOfZeroAtBeginning;
-        Pos posOfSignE;
+        Pos beginningZeroPos;
+        Pos dotPos;
+        Pos signEPos;
 
         while (true)
         {
-            if (this->__curChar() == 'e')
+            if (this->__isSignE(this->__curChar()))
             {
-                if (foundMinusSign && this->__pointer == numberBeginPos + 1)
+                if ((foundMinusSign && this->__pointer == numberBeginPos + 1) || (!foundMinusSign && this->__pointer == numberBeginPos))
                 {
                     throw ParsingException("Illegal number: Found 'e' following the minus sign.", this->__pointer);
                 }
                 if (!foundSignE)  // 检查是否已经存在'e'
                 {
                     foundSignE = true;
-                    posOfSignE = this->__pointer;
+                    signEPos = this->__pointer;
                 }
                 else
                 {
@@ -146,6 +149,7 @@ namespace YJson
                 if (!foundDot && !foundSignE)  // 只能有一个小数点，并且小数点不能在指数中
                 {
                     foundDot = true;
+                    dotPos = this->__pointer;
                 }
                 else
                 {
@@ -155,7 +159,7 @@ namespace YJson
             else if (this->__curChar() == '-')
             {
                 // 如果负号不在数字的开头或指数的开头则属于非法数字
-                if (this->__pointer != numberBeginPos && !(foundSignE && this->__pointer == posOfSignE + 1))
+                if (this->__pointer != numberBeginPos && !(foundSignE && this->__pointer == signEPos + 1))
                 {
                     throw ParsingException("Illegal number: The minus sign must be at the beginning of a number.", this->__pointer);
                 }
@@ -174,7 +178,7 @@ namespace YJson
                         (!foundMinusSign && this->__pointer == numberBeginPos))
                     {
                         foundZeroAtBegin = true;
-                        posOfZeroAtBeginning = this->__pointer;
+                        beginningZeroPos = this->__pointer;
                     }
                 }
             }
@@ -186,12 +190,12 @@ namespace YJson
             }
         }
 
-        if (foundZeroAtBegin && posOfZeroAtBeginning != numberEndPos)  // 先导0
+        if (foundZeroAtBegin && beginningZeroPos != numberEndPos && !(foundDot && beginningZeroPos == dotPos - 1))  // 先导0
         {
-            throw ParsingException("Illegal number: Found a zero at beginning.", posOfZeroAtBeginning);
+            throw ParsingException("Illegal number: Found a zero at beginning.", beginningZeroPos);
         }
 
-       if (this->__jsonString[numberEndPos] == 'e' || this->__jsonString[numberEndPos] == '.' || 
+       if (this->__isSignE(this->__jsonString[numberEndPos]) || this->__jsonString[numberEndPos] == '.' || 
             this->__jsonString[numberEndPos] == '-')
         {
             throw ParsingException("Illegal number: 'e', '-' or '.' can not be the end of the number.", numberEndPos);
@@ -454,7 +458,7 @@ namespace YJson
                     }
                     else if (!foundComma)
                     {
-                        throw ParsingException("Comma not found.", this->__pointer);
+                        throw ParsingException("Comma not found. :D", this->__pointer);
                     }
                     break;
                 }
@@ -498,6 +502,11 @@ namespace YJson
     bool Parser::__isBlank(char chr)
     {
         return chr == ' ' || chr == '\n';
+    }
+
+    bool Parser::__isSignE(char chr)
+    {
+        return chr == 'e' || chr == 'E';
     }
 }
 
