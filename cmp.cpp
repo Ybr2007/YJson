@@ -22,7 +22,7 @@ Json::Value& readFileJson()
     Json::Reader reader;
     Json::Value root;
 
-    ifstream in("Y://C++//YJson//large_example.json",ios::binary);
+    ifstream in("Y://C++//YJson//large_example2.json",ios::binary);
 
     reader.parse(in,root);
 
@@ -34,18 +34,28 @@ Json::Value& readFileJson()
 
 int main(int argc,char* argv[])
 {
-    timeit(
-        []()
-        {
-            Json::Value& value = readFileJson();
-            // cout << value.toStyledString() << endl;
-        }
-    );
-    timeit(
-        []()
-        {
-            YJson::Object& obj = YJson::deserializeFromFile("Y://C++//YJson//large_example.json");
-            // cout << obj << endl;
-        }
-    );
+    system("chcp 65001");
+    try
+    {
+        timeit(
+            []()
+            {
+                Json::Value& value = readFileJson();
+                // cout << value.toStyledString() << endl;
+            }
+        );
+        timeit(
+            []()
+            {
+                YJson::Object& obj = YJson::deserializeFromFile("Y://C++//YJson//large_example2.json");
+                // cout << obj << endl;
+                delete &obj;
+            }
+        );
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
+

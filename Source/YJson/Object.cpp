@@ -20,8 +20,8 @@ namespace YJson
     typedef double Number;
     typedef std::string String;
     typedef bool Bool;
-    typedef std::vector<Object> List;
-    typedef std::map<String, Object> Dict;
+    typedef std::vector<Object*> List;
+    typedef std::map<String, Object*> Dict;
 
     typedef std::variant<
         std::monostate,  // Null
@@ -71,6 +71,25 @@ namespace YJson
         Object(const Dict& num) : __value(ObjectValue(num)) {} // Dict
         Object(ObjectValue value) : __value(value) {}  // Object Value
 
+        ~Object()
+        {
+            // printf(">>>");
+            if (this->type() == ObjectType::List)
+            {
+                for (Object* item : this->as<List>())
+                {
+                    delete item;
+                }
+            }
+            if (this->type() == ObjectType::Dict)
+            {
+                for (auto item : this->as<Dict>())
+                {
+                    delete item.second;
+                }
+            }
+        }
+
         Object& operator=(const ObjectValue& value)
         {
             this->__value = value;
@@ -108,7 +127,7 @@ namespace YJson
             {
                 throw Exception("Only list object can be get item by index");
             }
-            return (this->as<List>().at(index));
+            return *(this->as<List>().at(index));
         }
         
         Object& operator[](std::string key)
@@ -121,7 +140,7 @@ namespace YJson
 
             if (dictValue.count(key) > 0)
             {
-                return dictValue[key];
+                return *dictValue[key];
             }
 
             throw Exception("No such key: " + key);
@@ -194,7 +213,7 @@ namespace YJson
                         str += ' ';
                     }
                     
-                    str += value[i].toString(indent, removeFollowingZerosForNumber, __indentLevel + 1);
+                    str += value[i]->toString(indent, removeFollowingZerosForNumber, __indentLevel + 1);
                     if (i != value.size() - 1)
                     {
                         str += ", ";
@@ -240,7 +259,7 @@ namespace YJson
                     str += item.first;
                     str += "\"";
                     str += ": ";
-                    str += item.second.toString(indent, removeFollowingZerosForNumber, __indentLevel + 1);
+                    str += item.second->toString(indent, removeFollowingZerosForNumber, __indentLevel + 1);
 
                     if (i != dictValue.size() - 1)
                     {

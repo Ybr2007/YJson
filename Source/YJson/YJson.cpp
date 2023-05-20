@@ -9,6 +9,10 @@ namespace YJson
 {
     const Object nullObject = Object();
 
+    /*
+    When you call this function and store into a value as obj, 
+    you should call `delete &obj` somewhere.
+    */
     Object& deserialize(std::string jsonString)
     {
         Parser parser;

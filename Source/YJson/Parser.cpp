@@ -6,7 +6,7 @@
 
 namespace YJson
 {
-    typedef std::size_t Pos;
+    typedef size_t Pos;
 
 
     class Parser
@@ -32,6 +32,7 @@ namespace YJson
 
         bool __isBlank(char chr);
         bool __isSignE(char chr);
+        bool __match(const char* pattern, size_t patternLength);
     };
 
     /*
@@ -96,13 +97,8 @@ namespace YJson
 
     Object* Parser::__parseNull()
     {
-        std::string boolString = this->__jsonString.substr(this->__pointer, 4);
-        if (boolString == "null")
+        if (this->__match("null", 4))
         {
-            for (short _ = 0; _ < 4; _ ++)  // 跳过 "null" 这4个字符，使指针指向 "null" 后第一个字符
-            {
-                this->__tryMovePtr();
-            }
             return new Object();
         }
         else
@@ -256,13 +252,8 @@ namespace YJson
     {
         if (this->__curChar() == 't')
         {
-            std::string boolString = this->__jsonString.substr(this->__pointer, 4);
-            if (boolString == "true")
+            if (this->__match("true", 4))
             {
-                for (short _ = 0; _ < 4; _ ++)  // 跳过 "true" 这4个字符，使指针指向 "true" 后第一个字符
-                {
-                    this->__tryMovePtr();
-                }
                 return new Object(true);
             }
             else
@@ -273,13 +264,8 @@ namespace YJson
 
         if (this->__curChar() == 'f')
         {
-            std::string boolString = this->__jsonString.substr(this->__pointer, 5);
-            if (boolString == "false")
+            if (this->__match("false", 5))
             {
-                for (short _ = 0; _ < 5; _ ++)  // 跳过 "false" 这5个字符，使指针指向 "false" 后第一个字符
-                {
-                    this->__tryMovePtr();
-                }
                 return new Object(false);
             }
             else
@@ -313,7 +299,7 @@ namespace YJson
         while (true)
         {
             Object* item = this->__parseObject();
-            list.push_back(*item);
+            list.push_back(item);
 
             if (this->__finished)
             {
@@ -429,7 +415,10 @@ namespace YJson
                 throw ParsingException("Value not found.", this->__pointer);
             }
 
-            dict[key->as<String>()] = *this->__parseObject();
+            Object* value = this->__parseObject();
+            dict[key->as<String>()] = value;
+
+            delete key;
 
             if (this->__finished)
             {
@@ -459,7 +448,7 @@ namespace YJson
                     }
                     else if (!foundComma)
                     {
-                        throw ParsingException("Comma not found. :D", this->__pointer);
+                        throw ParsingException("Comma not found.", this->__pointer);
                     }
                     break;
                 }
@@ -508,6 +497,17 @@ namespace YJson
     bool Parser::__isSignE(char chr)
     {
         return chr == 'e' || chr == 'E';
+    }
+
+    bool Parser::__match(const char* pattern, size_t patternLength)
+    {
+        if (this->__pointer + patternLength >= this->__jsonString.size()) return false;
+        for (Pos i = 0; i < patternLength; i ++)
+        {
+            if (pattern[i] != this->__curChar()) return false;
+            if (!this->__tryMovePtr()) return false;
+        }
+        return true;
     }
 }
 
