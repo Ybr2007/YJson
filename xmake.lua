@@ -7,7 +7,7 @@ target("YJson")
     
     set_kind("binary")  -- 生成二进制文件
 
-    add_files("test.cpp")  -- 根目录下.cpp
+    add_files("cmp.cpp")  -- 根目录下.cpp
 
     add_includedirs("Source")  -- 设置include目录
 

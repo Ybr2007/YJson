@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <YJson/Exception.cpp>
 #include <YJson/Object.cpp>
 
@@ -7,23 +8,24 @@ namespace YJson
 {
     typedef std::size_t Pos;
 
+
     class Parser
     {
     public:
-        Object parse(std::string jsonString);
+        Object* parse(std::string jsonString);
 
     private:
         Pos __pointer;
         std::string __jsonString;
         bool __finished;
 
-        Object __parseObject();
-        Object __parseNull();
-        Object __parseNumber();
-        Object __parseString();
-        Object __parseBoolean();
-        Object __parseList();
-        Object __parseDict();
+        Object* __parseObject();
+        Object* __parseNull();
+        Object* __parseNumber();
+        Object* __parseString();
+        Object* __parseBoolean();
+        Object* __parseList();
+        Object* __parseDict();
 
         char __curChar();
         bool __tryMovePtr();
@@ -41,7 +43,7 @@ namespace YJson
     Return:
         YJson::Object -> 解析得到的对象
     */
-    Object Parser::parse(std::string jsonString)
+    Object* Parser::parse(std::string jsonString)
     {
         this->__jsonString = jsonString;
         this->__pointer = 0;
@@ -52,7 +54,7 @@ namespace YJson
             throw ParsingException("Empty string: The json string is empty.", 0);
         }
 
-        Object result = this->__parseObject();
+        Object* result = this->__parseObject();
 
         if (!this->__finished)
         {
@@ -72,7 +74,7 @@ namespace YJson
         return result;
     }
 
-    Object Parser::__parseObject()
+    Object* Parser::__parseObject()
     {
         // 跳过先导空白
         while (this->__isBlank(this->__curChar()))
@@ -92,7 +94,7 @@ namespace YJson
         throw ParsingException("Unknown object.", this->__pointer);
     }
 
-    Object Parser::__parseNull()
+    Object* Parser::__parseNull()
     {
         std::string boolString = this->__jsonString.substr(this->__pointer, 4);
         if (boolString == "null")
@@ -101,7 +103,7 @@ namespace YJson
             {
                 this->__tryMovePtr();
             }
-            return Object();
+            return new Object();
         }
         else
         {
@@ -109,7 +111,7 @@ namespace YJson
         }
     }
 
-    Object Parser::__parseNumber()
+    Object* Parser::__parseNumber()
     {
         Pos numberBeginPos = this->__pointer;  // 数字第一个字符的位置
         Pos numberEndPos;  // 数字最后一位的位置
@@ -202,10 +204,10 @@ namespace YJson
         }
 
         ObjectValue number = std::stod(this->__jsonString.substr(numberBeginPos, numberEndPos - numberBeginPos + 1));
-        return Object(number);
+        return new Object(number);
     }
 
-    Object Parser::__parseString()
+    Object* Parser::__parseString()
     {
         if (this->__curChar() != '"')
         {
@@ -247,10 +249,10 @@ namespace YJson
         }
 
         ObjectValue stringValue = this->__jsonString.substr(firstCharPos, rightQuotationMarkPos - firstCharPos);
-        return Object(stringValue);
+        return new Object(stringValue);
     }
 
-    Object Parser::__parseBoolean()
+    Object* Parser::__parseBoolean()
     {
         if (this->__curChar() == 't')
         {
@@ -261,7 +263,7 @@ namespace YJson
                 {
                     this->__tryMovePtr();
                 }
-                return Object(ObjectValue(true));
+                return new Object(true);
             }
             else
             {
@@ -278,7 +280,7 @@ namespace YJson
                 {
                     this->__tryMovePtr();
                 }
-                return Object(ObjectValue(false));
+                return new Object(false);
             }
             else
             {
@@ -287,7 +289,7 @@ namespace YJson
         }
     }
 
-    Object Parser::__parseList()
+    Object* Parser::__parseList()
     {
         if (this->__curChar() != '[')
         {
@@ -305,13 +307,13 @@ namespace YJson
         if (this->__curChar() == ']')
         {
             this->__tryMovePtr();
-            return Object(ObjectValue(list));
+            return new Object(list);
         }
 
         while (true)
         {
-            Object item = this->__parseObject();
-            list.push_back(item);
+            Object* item = this->__parseObject();
+            list.push_back(*item);
 
             if (this->__finished)
             {
@@ -362,10 +364,10 @@ namespace YJson
             }
         }
 
-        return Object(ObjectValue(list));
+        return new Object(list);
     }
 
-    Object Parser::__parseDict()
+    Object* Parser::__parseDict()
     {
         if (this->__curChar() != '{')
         {
@@ -383,13 +385,13 @@ namespace YJson
         if (this->__curChar() == '}')  // 空dict
         {
             this->__tryMovePtr();
-            return Object(ObjectValue(dict));
+            return new Object(dict);
         }
 
         while (true)
         {
-            Object key = this->__parseObject();
-            if (key.type() != ObjectType::String)
+            Object* key = this->__parseObject();
+            if (key->type() != ObjectType::String)
             {
                 throw ParsingException("Type of key is not the string.", this->__pointer);
             }
@@ -427,8 +429,7 @@ namespace YJson
                 throw ParsingException("Value not found.", this->__pointer);
             }
 
-            Object value = this->__parseObject();
-            dict[std::get<std::string>(key.value())] = value;
+            dict[key->as<String>()] = *this->__parseObject();
 
             if (this->__finished)
             {
@@ -479,7 +480,7 @@ namespace YJson
             }
         }
 
-        return Object(ObjectValue(dict));
+        return new Object(dict);
     }
     
 

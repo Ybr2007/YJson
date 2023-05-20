@@ -10,7 +10,8 @@ build
 *.bat
 
 # test code
-test.cpp
+cmp.cpp
 
 # large_example
 large_example.json
+large_example2.json

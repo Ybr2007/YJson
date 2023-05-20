@@ -1,8 +1,10 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include <map>
 #include <variant>
+#include <sstream>
 #include <YJson/Exception.cpp>
 
 
@@ -19,7 +21,7 @@ namespace YJson
     typedef std::string String;
     typedef bool Bool;
     typedef std::vector<Object> List;
-    typedef std::map<std::string, Object> Dict;
+    typedef std::map<String, Object> Dict;
 
     typedef std::variant<
         std::monostate,  // Null
@@ -62,11 +64,12 @@ namespace YJson
     {
     public:
         Object() : __value(ObjectValue()) {}  // Null
-
-        Object(ObjectValue value)
-        {
-            this->__value = value;
-        }
+        Object(Number num) : __value(ObjectValue(num)) {} // Number
+        Object(Bool num) : __value(ObjectValue(num)) {} // Boolean
+        Object(const String& num) : __value(ObjectValue(num)) {} // String
+        Object(const List& num) : __value(ObjectValue(num)) {} // List
+        Object(const Dict& num) : __value(ObjectValue(num)) {} // Dict
+        Object(ObjectValue value) : __value(value) {}  // Object Value
 
         Object& operator=(const ObjectValue& value)
         {
@@ -84,7 +87,12 @@ namespace YJson
             return this->type() == ObjectType::Null;
         }
 
-        ObjectValue value() const
+        ObjectValue& value()
+        {
+            return this->__value;
+        }
+
+        const ObjectValue& value() const
         {
             return this->__value;
         }
@@ -94,16 +102,16 @@ namespace YJson
             this->__value = value;
         }
 
-        Object operator[](std::size_t index)
+        Object& operator[](std::size_t index)
         {
             if (this->type() != ObjectType::List)
             {
                 throw Exception("Only list object can be get item by index");
             }
-            return this->as<List>().at(index);
+            return (this->as<List>().at(index));
         }
         
-        Object operator[](std::string key)
+        Object& operator[](std::string key)
         {
             if (this->type() != ObjectType::Dict)
             {

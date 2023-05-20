@@ -7,13 +7,15 @@
 
 namespace YJson
 {
-    Object deserialize(std::string jsonString)
+    const Object nullObject = Object();
+
+    Object& deserialize(std::string jsonString)
     {
         Parser parser;
-        return parser.parse(jsonString);
+        return *parser.parse(jsonString);
     }
 
-    Object deserializeFromFile(std::string filePath)
+    Object& deserializeFromFile(std::string filePath)
     {
         std::ifstream f(filePath, std::ios::in);  
 
@@ -31,7 +33,7 @@ namespace YJson
         return deserialize(jsonString);
     }
 
-    Object deserializeFromFile(std::ifstream f)
+    Object& deserializeFromFile(std::ifstream f)
     {
         std::stringstream buffer;  
         buffer << f.rdbuf();  
