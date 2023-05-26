@@ -1,17 +1,14 @@
 #pragma once
 #include <fstream>
-#include <sstream>
 #include <YJson/Object.cpp>
 #include <YJson/Parser.cpp>
 
 
 namespace YJson
 {
-    const Object nullObject = Object();
-
     /*
-    When you call this function and store into a value as obj, 
-    you should call `delete &obj` somewhere.
+    When you call this function and store the return value into a value as `obj`, 
+    you should call `delete &obj` somewhere, or it will cause the memory leak.
     */
     Object& deserialize(std::string jsonString)
     {
@@ -19,6 +16,10 @@ namespace YJson
         return *parser.parse(jsonString);
     }
 
+    /*
+    When you call this function and store the return value into a value as `obj`, 
+    you should call `delete &obj` somewhere, or it will cause the memory leak.
+    */
     Object& deserializeFromFile(std::string filePath)
     {
         std::ifstream f(filePath, std::ios::in);  
@@ -37,6 +38,10 @@ namespace YJson
         return deserialize(jsonString);
     }
 
+    /*
+    When you call this function and store the return value into a value as `obj`, 
+    you should call `delete &obj` somewhere, or it will cause the memory leak.
+    */
     Object& deserializeFromFile(std::ifstream f)
     {
         std::stringstream buffer;  
@@ -46,13 +51,13 @@ namespace YJson
         return deserialize(jsonString);
     }
 
-    std::string serialize(Object obj, std::size_t indent=0,
+    std::string serialize(const Object& obj, std::size_t indent=0,
                         bool removeFollowingZerosForNumber=true)
     {
         return obj.toString(indent, removeFollowingZerosForNumber);
     }
 
-    void serializeToFile(std::string filePath, Object obj, std::size_t indent=0, 
+    void serializeToFile(std::string filePath, const Object& obj, std::size_t indent=0, 
                         bool removeFollowingZerosForNumber=true)
     {
         std::ofstream f(filePath, std::ios::out);
@@ -60,7 +65,7 @@ namespace YJson
         f.close();
     }
     
-    void serializeToFile(std::ofstream f, Object obj, std::size_t indent=0,
+    void serializeToFile(std::ofstream f, const Object& obj, std::size_t indent=0,
                         bool removeFollowingZerosForNumber=true)
     {
         f << serialize(obj, indent, removeFollowingZerosForNumber);

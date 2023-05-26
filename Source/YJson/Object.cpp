@@ -1,5 +1,5 @@
 #pragma once
-#include <memory>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -63,17 +63,16 @@ namespace YJson
     class Object
     {
     public:
-        Object() : __value(ObjectValue()) {}  // Null
-        Object(Number num) : __value(ObjectValue(num)) {} // Number
-        Object(Bool num) : __value(ObjectValue(num)) {} // Boolean
-        Object(const String& num) : __value(ObjectValue(num)) {} // String
-        Object(const List& num) : __value(ObjectValue(num)) {} // List
-        Object(const Dict& num) : __value(ObjectValue(num)) {} // Dict
-        Object(ObjectValue value) : __value(value) {}  // Object Value
+        Object() : __value(ObjectValue()) {}
+        Object(Number num) : __value(ObjectValue(num)) {}
+        Object(Bool num) : __value(ObjectValue(num)) {}
+        Object(const String& num) : __value(ObjectValue(num)) {}
+        Object(const List& num) : __value(ObjectValue(num)) {}
+        Object(const Dict& num) : __value(ObjectValue(num)) {}
+        Object(ObjectValue value) : __value(value) {}
 
         ~Object()
         {
-            // printf(">>>");
             if (this->type() == ObjectType::List)
             {
                 for (Object* item : this->as<List>())
@@ -116,7 +115,7 @@ namespace YJson
             return this->__value;
         }
 
-        void setValue(ObjectValue value)
+        void setValue(const ObjectValue& value)
         {
             this->__value = value;
         }
@@ -297,4 +296,7 @@ namespace YJson
         os << self.toString();
         return os;
     }
+
+    const ObjectValue nullValue = ObjectValue();
+    const Object nullObject = Object();
 }

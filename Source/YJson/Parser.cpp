@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <YJson/Exception.cpp>
 #include <YJson/Object.cpp>
 
@@ -12,7 +11,7 @@ namespace YJson
     class Parser
     {
     public:
-        Object* parse(std::string jsonString);
+        Object* parse(std::string_view jsonString);
 
     private:
         Pos __pointer;
@@ -23,7 +22,8 @@ namespace YJson
         Object* __parseNull();
         Object* __parseNumber();
         Object* __parseString();
-        Object* __parseBoolean();
+        Object* __parseTrue();
+        Object* __parseFalse();
         Object* __parseList();
         Object* __parseDict();
 
@@ -44,7 +44,7 @@ namespace YJson
     Return:
         YJson::Object -> 解析得到的对象
     */
-    Object* Parser::parse(std::string jsonString)
+    Object* Parser::parse(std::string_view jsonString)
     {
         this->__jsonString = jsonString;
         this->__pointer = 0;
@@ -86,13 +86,19 @@ namespace YJson
             }
         }
 
-        if (this->__curChar() == '{') return this->__parseDict();  // 匹配到 { 认定为dict
-        if (this->__curChar() == '[') return this->__parseList();  // 匹配到 [ 认定为list
-        if (this->__curChar() == '"') return this->__parseString();    // 匹配到 " 认定为string
-        if (this->__curChar() == 't' || this->__curChar() == 'f') return this->__parseBoolean();  // 匹配到 t 或 f 认定为bool
-        if (this->__curChar() == 'n') return this->__parseNull();  // 匹配到 n 认定为null
-        if (std::isdigit(this->__curChar()) || this->__curChar() == '-') return this->__parseNumber();  // 匹配到数字或负号认定为number
-        throw ParsingException("Unknown object.", this->__pointer);
+        switch (this->__curChar())
+        {
+        case '{': return this->__parseDict();
+        case '[': return this->__parseList();
+        case '"': return this->__parseString();
+        case 't': return this->__parseTrue();
+        case 'f': return this->__parseFalse(); 
+        case 'n': return this->__parseNull();
+
+        default:
+            if (std::isdigit(this->__curChar()) || this->__curChar() == '-') return this->__parseNumber();
+            throw ParsingException("Unknown object.", this->__pointer);
+        }
     }
 
     Object* Parser::__parseNull()
@@ -205,11 +211,6 @@ namespace YJson
 
     Object* Parser::__parseString()
     {
-        if (this->__curChar() != '"')
-        {
-            throw ParsingException("Left quotation mark not found.", this->__pointer);
-        }
-
         if (!this->__tryMovePtr())  // 从左引号的下一个字符开始
         {
             throw ParsingException("Right quotation mark not found.", this->__pointer);
@@ -248,40 +249,32 @@ namespace YJson
         return new Object(stringValue);
     }
 
-    Object* Parser::__parseBoolean()
+    Object* Parser::__parseTrue()
     {
-        if (this->__curChar() == 't')
+        if (this->__match("true", 4))
         {
-            if (this->__match("true", 4))
-            {
-                return new Object(true);
-            }
-            else
-            {
-                throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
-            }
+            return new Object(true);
         }
-
-        if (this->__curChar() == 'f')
+        else
         {
-            if (this->__match("false", 5))
-            {
-                return new Object(false);
-            }
-            else
-            {
-                throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
-            }
+            throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
+        }
+    }
+
+    Object* Parser::__parseFalse()
+    {
+        if (this->__match("false", 5))
+        {
+            return new Object(false);
+        }
+        else
+        {
+            throw ParsingException("Try to parse an unknown object as boolean.", this->__pointer);
         }
     }
 
     Object* Parser::__parseList()
     {
-        if (this->__curChar() != '[')
-        {
-            throw ParsingException("Left middle bracket not found.", this->__pointer);
-        }
-
         if (!this->__tryMovePtr())  // 从左中括号的下一个字符开始
         {
             throw ParsingException("Right middle bracket not found.", this->__pointer);
@@ -355,11 +348,6 @@ namespace YJson
 
     Object* Parser::__parseDict()
     {
-        if (this->__curChar() != '{')
-        {
-            throw ParsingException("Left braces not found.", this->__pointer);
-        }
-
         if (!this->__tryMovePtr())  // 从左大括号的下一个字符开始
         {
             throw ParsingException("Right brace not found.", this->__pointer);
@@ -510,4 +498,3 @@ namespace YJson
         return true;
     }
 }
-

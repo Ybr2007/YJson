@@ -13,7 +13,7 @@ void timeit(T&& f)
 {
     time_t start = clock();
     f();
-    cout << clock() - start << endl;
+    cout << "Time: " << clock() - start << endl;
 }
 
 
@@ -22,9 +22,9 @@ Json::Value& readFileJson()
     Json::Reader reader;
     Json::Value root;
 
-    ifstream in("Y://C++//YJson//large_example2.json",ios::binary);
+    ifstream in("Y://C++//YJson//large_example.json",ios::binary);
 
-    reader.parse(in,root);
+    bool s = reader.parse(in,root);
 
     in.close();
 
@@ -40,16 +40,14 @@ int main(int argc,char* argv[])
         timeit(
             []()
             {
-                Json::Value& value = readFileJson();
-                // cout << value.toStyledString() << endl;
+                YJson::Object& obj = YJson::deserializeFromFile("Y://C++//YJson//large_example.json");
+                delete &obj;
             }
         );
         timeit(
             []()
             {
-                YJson::Object& obj = YJson::deserializeFromFile("Y://C++//YJson//large_example2.json");
-                // cout << obj << endl;
-                delete &obj;
+                Json::Value& value = readFileJson();
             }
         );
     }
@@ -57,5 +55,7 @@ int main(int argc,char* argv[])
     {
         std::cerr << e.what() << '\n';
     }
-}
 
+    // YJson::Object& obj = YJson::deserializeFromFile("Y://C++//YJson//small_example.json");
+    // delete &obj;
+}
